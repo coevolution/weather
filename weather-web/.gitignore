@@ -1,6 +1,7 @@
 /target/
 /.idea/
 /log/
+/*.iml
 # Compiled class file
 *.class
 
