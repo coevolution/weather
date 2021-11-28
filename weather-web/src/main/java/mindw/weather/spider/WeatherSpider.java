@@ -2,11 +2,8 @@ package mindw.weather.spider;
 
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -49,7 +46,7 @@ public class WeatherSpider {
 	/**
 	 * 获得一个城市的天气
 	 * 
-	 * @param city
+	 * @param queryName
 	 * @return
 	 */
 	public static WeatherData getWeatherItems(String queryName) {
@@ -89,9 +86,19 @@ public class WeatherSpider {
 			String url = String.format("http://www.tianqi.com/%s/30/", city);
 
 			Document document = Jsoup.parse(new URL(url), 3000);
+			Element rootElement = null;
+			try {
+				rootElement = document.getElementsByClass("weaul").get(0);
+			} catch (Exception e) {
+				LOGGER.warn("failed to getElementsByClass " + "weaul");
+			}
+			Elements elements = null;
+			try {
+				elements = rootElement.getElementsByTag("li");
+			} catch (Exception e) {
+				LOGGER.warn("failed to getElementsByTag " + "li" + " from " + "weaul");
+			}
 
-			Element rootElement = document.getElementsByClass("box_day").get(0);
-			Elements elements = rootElement.getElementsByClass("table_day");
 
 			// <h3><b>12月30日</b> <em>今天</em></h3>
 			// <ul>
@@ -101,14 +108,29 @@ public class WeatherSpider {
 			// <li>西北风 2级</li>
 			// </ul>
 
+			// <li>
+			//    <a href="/shanghai/?qd=tq30" title="上海今天天气">
+			//        <div class="weaul_q weaul_qblue"><span class="fl">11-27</span>
+			//            <span class="fr">今天</span>
+			//        </div>
+			//        <div class="weaul_a"><img src="//static.tianqistatic.com/static/tianqi2018/ico2/b0.png"></div>
+			//        <div class="weaul_z">晴</div>
+			//        <div class="weaul_z"><span>12</span>~<span>16</span>℃</div>
+			//        <!-- <div class="weaul_w">空气 <span
+			//            style="background-color:#79b800;"        >优</span></div>
+			//        <div class="weaul_s">东北风 1级</div> -->
+			//        <div class="weaul_act">查看天气详情</div>
+			//    </a>
+			//</li>
+
 			List<WeatherItem> weatherItems = new ArrayList<>(elements.size());
 			for (Element element : elements) {
 
 				// 时间
-				String timeStr = element.getElementsByTag("h3").get(0).text();
+				String timeStr = element.getElementsByClass("fl").get(0).text();
 				String[] times = timeStr.trim().split(" ");
-				String date = times[0];
-				String dayKind = times[1];
+				String date = timeStr;
+				String dayKind = element.getElementsByClass("fr").get(0).text();
 
 				// 图片
 				// http://pic9.tianqijun.com/static/tianqi2018/ico2/b8.png
@@ -117,24 +139,16 @@ public class WeatherSpider {
 				weatherImg = weatherImg.substring(index + 1);
 
 				// 雨 4~11℃
-				String tempStr = element.getElementsByClass("temp").text();
-				String[] temps = tempStr.split(" ");
+				Elements weatherAndTemps = element.getElementsByClass("weaul_z");
+				String weather = weatherAndTemps.get(0).text();
+				Elements temps = weatherAndTemps.get(1).getElementsByTag("span");
 
-				String weather = temps[0];
-				String[] temperatures = temps[1].replaceAll("℃", "").split("~");
-
-				String minTemperature = temperatures[0];
-				String maxTemperature = temperatures[1];
+				String minTemperature = temps.get(0).text();
+				String maxTemperature = temps.get(1).text();
 
 				// 西北风 2级
-				String wind = "";
-				for (Element windElemnt : element.getElementsByTag("li")) {
-					if (windElemnt.hasClass("img") || windElemnt.hasClass("temp")) {
-						continue;
-					}
-					wind = windElemnt.text();
-					break;
-				}
+				String tempWind = element.html().substring(element.html().indexOf("weaul_s") + 9);
+				String wind = tempWind.substring(0, tempWind.indexOf("<"));
 
 				WeatherItem weatherItem = new WeatherItem(date, dayKind, weather, weatherImg, minTemperature,
 						maxTemperature, wind);
@@ -155,7 +169,7 @@ public class WeatherSpider {
 			return weatherData;
 
 		} catch (Throwable e) {
-			LOGGER.error(e.toString());
+			LOGGER.error(e);
 		}
 		return WeatherData.ERROR_RESULT;
 	}
@@ -165,6 +179,6 @@ public class WeatherSpider {
 	 * 获得当前时间 "2015年 05月26日"
 	 */
     private static String currentDate(){
-        return new SimpleDateFormat("yyyy MM月dd日").format(new Date());
+        return new SimpleDateFormat("yyyy MM-dd").format(new Date());
     }
 }

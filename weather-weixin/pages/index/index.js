@@ -1,7 +1,7 @@
 //index.js
 //获取应用实例
 const app = getApp();
-const baseUrl = "你服务部署的网址/weather/";
+const baseUrl = "https://192.168.1.3:443/weather/";
 var WxSearch = require('../../wxSearchView/wxSearchView.js');
 
 Page({
@@ -38,14 +38,23 @@ Page({
     wx.getLocation({
       type: 'wgs84',
       success: function (res) {
+        console.log("latitude=" + res.latitude + "longitude=" + res.longitude)
         // 根据经纬度获取天气情况
         wx.request({
           url: baseUrl + "?latitude=" + res.latitude + "&longitude=" + res.longitude,
           success: (res) => {
-            that.setData({  weatherData: res.data });
+            console.log("get location 成功")
+             that.setData({  weatherData: res.data });
             // console.log(res.data);
           },
-          fail: (res) => { },
+          fail: (res) => {
+            console.log("get location 失败")
+            that.setData({ weatherData: {
+              "queryName": "", "date": "2021-11-27", "weatherItems": [
+                {"date":2021-11-27,"dayKind":"fail","minTemperature":20,"maxTemperature":30,"weatherImg":"b1.png","weather":"下雨"}
+              ]
+            } })
+           },
           complete: () => { }
         })
       }
@@ -73,6 +82,7 @@ Page({
 
   // 搜索入口  
   wxSearchTab: function () {
+    console.log("開始搜索")
     wx.redirectTo({
       url: '../search/search'
     })

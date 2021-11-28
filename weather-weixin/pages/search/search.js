@@ -27,6 +27,7 @@ Page({
   mySearchFunction: function (value) {
     // do your job here
     // 跳转
+    console.log("檢索内容：" + value)
     wx.redirectTo({
       url: '../index/index?searchValue='+value
     })
