@@ -1,7 +1,8 @@
 //index.js
 //获取应用实例
 const app = getApp();
-const baseUrl = "https://192.168.1.3:443/weather/";
+// const baseUrl = "https://1.117.55.225/john-no-weather/weather/";
+const baseUrl = "www.jlu.ink/john-no-weather/weather/";
 var WxSearch = require('../../wxSearchView/wxSearchView.js');
 
 Page({
@@ -45,15 +46,9 @@ Page({
           success: (res) => {
             console.log("get location 成功")
              that.setData({  weatherData: res.data });
-            // console.log(res.data);
           },
           fail: (res) => {
             console.log("get location 失败")
-            that.setData({ weatherData: {
-              "queryName": "", "date": "2021-11-27", "weatherItems": [
-                {"date":2021-11-27,"dayKind":"fail","minTemperature":20,"maxTemperature":30,"weatherImg":"b1.png","weather":"下雨"}
-              ]
-            } })
            },
           complete: () => { }
         })
@@ -76,6 +71,15 @@ Page({
             weatherData: res.data
           });
         },
+        fail: (res) => {
+          this.setData({
+            weatherData: {
+              "queryName": "杭州", "date": "2021-11-27 00:00:43", "weatherItems": [
+                {"date":"2021-11-30","dayKind":"完","minTemperature":20,"maxTemperature":30,"weatherImg":"b1.png","weather":"好天"}
+              ]
+            }
+          });
+        }
       })
     }
   },
