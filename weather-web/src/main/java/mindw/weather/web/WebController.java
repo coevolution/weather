@@ -72,7 +72,9 @@ public class WebController {
         	String requestUrl = String.format("https://apis.map.qq.com/ws/geocoder/v1/?location=%s,%s&key=%s", 
         			latitude,longitude,Config.LOCATION_APP_KEY);
             URL url = new URL(requestUrl);
-            HttpURLConnection httpUrlConn = (HttpURLConnection) url.openConnection();  
+            HttpURLConnection httpUrlConn = (HttpURLConnection) url.openConnection();
+            httpUrlConn.setReadTimeout(10000);
+            httpUrlConn.setConnectTimeout(10000);
             httpUrlConn.setDoOutput(true);  
             httpUrlConn.setDoInput(true);  
             httpUrlConn.setUseCaches(false);
@@ -114,7 +116,7 @@ public class WebController {
         return jsonObject;  
     } 
 
-    
+
 //    为了验证证书
 //    @RequestMapping(value = "/.well-known/pki-validation/fileauth.txt",method = RequestMethod.GET)
 //	public ResponseEntity<byte[]> statisticsToExcel() throws IOException {
