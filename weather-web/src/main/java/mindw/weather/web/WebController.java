@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.log4j.Logger;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,7 +67,7 @@ public class WebController {
      */  
     private JSONObject httpRequest(String latitude,String longitude) {  
         JSONObject jsonObject = null;  
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         InputStream inputStream=null;
         try {
         	String requestUrl = String.format("https://apis.map.qq.com/ws/geocoder/v1/?location=%s,%s&key=%s", 
@@ -84,10 +85,10 @@ public class WebController {
   
             //将返回的输入流转换成字符串  
             inputStream = httpUrlConn.getInputStream();  
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "utf-8");  
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);  
   
-            String str = null;  
+            String str;
             while ((str = bufferedReader.readLine()) != null) {  
                 buffer.append(str);  
             }  
